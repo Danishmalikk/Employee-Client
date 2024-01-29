@@ -1,37 +1,111 @@
-import React from 'react'
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import Table from "react-bootstrap/Table";
 
-const Employee = () => {
+const ShowEmployee = () => {
+  const [data, setData] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    getData();
+  }, [data]);
+
+  const getData = async () => {
+    await axios
+      .get("http://localhost:8001/showemployee")
+      .then((e) => setData(e.data));
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("login");
+    navigate("/");
+  };
+  const handleEdit = async (id) => {
+    try {
+      // await axios.put("http://localhost:8001/editemployee/" + id);
+      navigate('/addemployee',id)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    await axios.delete(`http://localhost:8001/deleteemployee/${id}`)
+    .then(res=>console.log(res))
+    .catch(error=> {
+      console.log(error)
+    })
+  };
+
   return (
-    <div className='flex flex-col items-center w-96 border-gray-200 border-2 shadow-lg p-4'>
-        <div> Add an Employee </div>
-        <div>
-        <form className='flex flex-col gap-2' type="submit"> 
-            <label > First Name </label>
-            <input className='border rounded-sm p-1 border-black' placeholder='enter name here' type='text' />
-            <label > Last Name </label>
-            <input className='border rounded-sm p-1 border-black' placeholder='enter lastname here' type='text' />
-            <label > Qualification </label>
-            <select className='border rounded-sm p-1 border-black'> 
-                <option hidden></option>
-                <option>10th</option>
-                <option>12th</option>
-                <option>Graduation</option>
-                <option>Post-Graduation</option>
-            </select>
-            <label > Address </label>
-            <input className='border rounded-sm p-1 border-black' placeholder='enter address here' type='text' />
-            <label > Email </label>
-            <input className='border rounded-sm p-1 border-black' placeholder='enter email here' type='email' />
-            <label > Mobile No. </label>
-            <input className='border rounded-sm p-1 border-black' placeholder='enter no. here' type='number' />
-            <label > Experience </label>
-            <input className='border rounded-sm p-1 border-black' placeholder='enter exp. here' type='text' />
-
-            <input className='border rounded-sm p-1 border-black' type='submit' value='Add' /> 
-        </form>
-        </div>
+    <div>
+      <div className="flex flex-row gap-80 mb-10">
+        <div> Welcome Page !! </div>
+        <Link
+          className="bg-blue-700 p-2 text-white rounded-lg px-4"
+          to={"/addemployee"}
+        >
+          Add Employee
+        </Link>
+        <button
+          className="bg-blue-700 p-2 text-white rounded-lg px-4"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+      </div>
+      {data.map((item) => {
+        return (
+          <Table
+            className="text-justify w-full border-collapse border border-slate-500"
+            striped
+            bordered
+            hover
+            key={item._id}
+          >
+            <thead>
+              <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Qualification</th>
+                <th>Address</th>
+                <th>Email</th>
+                <th>Mobile No.</th>
+                <th>Experience</th>
+                <th>Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{item.firstName}</td>
+                <td>{item.lastName}</td>
+                <td>{item.qualification}</td>
+                <td>{item.address}</td>
+                <td>{item.email}</td>
+                <td>{item.mobile_no}</td>
+                <td>{item.experience}</td>
+                <td className="flex gap-2">
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => handleEdit(item._id)}
+                  >
+                    ✏️
+                  </span>
+                  <span
+                    className="cursor-pointer"
+                    onClick={() => handleDelete(item._id)}
+                  >
+                    Delete
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+        );
+      })}
     </div>
-  )
-}
+  );
+};
 
-export default Employee
+export default ShowEmployee;
